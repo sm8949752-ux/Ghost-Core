@@ -1,0 +1,99 @@
+version: '3'
+
+vars:
+  REGISTRY: ghost-core
+  GIT_HASH:
+    sh: git rev-parse --short HEAD || echo "dev"
+  BUILD_DATE:
+    sh: date -u +'%Y-%m-%dT%H:%M:%SZ'
+
+  NGINX_VER: 1.28.1
+  NGINX_SHA: "40e7a0916d121e8905ef50f2a738b675599e42b2224a582dd938603fed15788e"
+  NJS_VER: 0.9.4
+  NJS_SHA: "7b3a9f14b0f09311d9031c2a252cb0e23c06baac2e586a7d12c75aa6cba4ca0e"
+
+  REDIS_VER: 7.2.3
+
+tasks:
+  default:
+    deps: [nginx:build-all]
+
+  # ==========================================
+  # BUILD TASKS
+  # ==========================================
+
+  nginx:build-all:
+    desc: Build all Nginx variants (Lite & NJS)
+    deps: [nginx:lite, nginx:njs]
+
+  nginx:lite:
+    desc: Build Nginx Lite (Distroless)
+    cmds:
+      - echo ">>> Building Ghost Core [Nginx Lite]..."
+      - >
+        docker build --no-cache --target final
+        --build-arg NGINX_VERSION={{.NGINX_VER}}
+        --build-arg NGINX_SHA256={{.NGINX_SHA}}
+        --build-arg CONFIG_FILE=nginx.conf
+        --build-arg VCS_REF={{.GIT_HASH}}
+        --build-arg BUILD_DATE={{.BUILD_DATE}}
+        -t {{.REGISTRY}}/nginx:lite
+        -t {{.REGISTRY}}/nginx:{{.NGINX_VER}}-lite
+        -f nginx/Dockerfile .
+
+  nginx:njs:
+    desc: Build Nginx NJS (Distroless)
+    cmds:
+      - echo ">>> Building Ghost Core [Nginx NJS]..."
+      - >
+        docker build --no-cache --target final
+        --build-arg NGINX_VERSION={{.NGINX_VER}}
+        --build-arg NGINX_SHA256={{.NGINX_SHA}}
+        --build-arg NJS_VERSION={{.NJS_VER}}
+        --build-arg NJS_SHA256={{.NJS_SHA}}
+        --build-arg CONFIG_FILE=nginx.conf
+        --build-arg VCS_REF={{.GIT_HASH}}
+        --build-arg BUILD_DATE={{.BUILD_DATE}}
+        -t {{.REGISTRY}}/nginx:njs
+        -t {{.REGISTRY}}/nginx:{{.NGINX_VER}}-njs
+        -f nginx/Dockerfile .
+
+  nginx:dev:
+    desc: Build Nginx Dev (Bash/Tools)
+    cmds:
+      - echo ">>> Building Ghost Core [Nginx Dev]..."
+      - >
+        docker build --no-cache --target dev
+        --build-arg NGINX_VERSION={{.NGINX_VER}}
+        --build-arg NGINX_SHA256={{.NGINX_SHA}}
+        --build-arg NJS_VERSION={{.NJS_VER}}
+        --build-arg NJS_SHA256={{.NJS_SHA}}
+        --build-arg CONFIG_FILE=nginx.conf
+        -t {{.REGISTRY}}/nginx:dev
+        -f nginx/Dockerfile .
+
+  # ==========================================
+  # RUN & DEBUG TASKS (الدلع كله هنا)
+  # ==========================================
+
+  nginx:run-dev:
+    desc: Run Dev container interactively (Port 8080)
+    interactive: true
+    cmds:
+      - echo ">>> Stopping old container..."
+      - docker rm -f ghost-nginx-dev 2>/dev/null || true
+      - echo ">>> Starting Ghost Core Dev..."
+      - echo ">>> You are now entering the matrix. Try 'ls -l /usr/lib/nginx/modules'"
+      - docker run -it --rm --name ghost-nginx-dev -p 8080:8080 {{.REGISTRY}}/nginx:dev bash
+
+  # ==========================================
+  # REDIS TASKS (Prefix: redis:) 
+  # ==========================================
+  
+  # redis:prod:
+  #   desc: Build Redis Distroless
+  #   cmds: ...
+
+  # redis:dev:
+  #   desc: Build Redis Dev
+  #   cmds: ...
