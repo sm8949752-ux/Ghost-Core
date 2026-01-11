@@ -23,4 +23,3 @@ RUN apt-get update && \
 
 RUN yq --version && just --version
 
-WORKDIR /workspaces/app
