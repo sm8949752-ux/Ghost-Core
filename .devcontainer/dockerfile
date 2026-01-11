@@ -5,25 +5,21 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         software-properties-common \
-        ca-certificates && \
-    add-apt-repository universe
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+        ca-certificates \
         curl \
         wget \
-        git \
         gnupg \
         lsb-release \
-        just && \
-    rm -rf /var/lib/apt/lists/* 
-
-RUN curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | /bin/bash && \
-    apt-get update && apt-get install -y task && \
+        git && \
+    add-apt-repository universe && \
+    curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | bash && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        just \
+        task && \
+    wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq && \
     rm -rf /var/lib/apt/lists/*
-RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
-    -O /usr/local/bin/yq && \
-    chmod +x /usr/local/bin/yq
-COPY . /workspaces/app
 
 RUN yq --version && just --version
 
