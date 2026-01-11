@@ -23,4 +23,4 @@ RUN apt-get update && \
 
 RUN yq --version && just --version
 
-WORKDIR /workspaces/Ghost-Core
+WORKDIR /workspaces/Ghost-Core/
