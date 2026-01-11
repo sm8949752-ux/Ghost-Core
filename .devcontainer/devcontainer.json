@@ -3,6 +3,9 @@
   "build": {
     "dockerfile": "dockerfile"
   },
+  "mounts": [
+        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+    ],
   "workspaceFolder": "/workspaces/app",
   "customizations": {
     "vscode": {
