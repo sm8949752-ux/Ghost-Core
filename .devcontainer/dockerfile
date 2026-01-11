@@ -23,6 +23,7 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | /bin/b
 RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 \
     -O /usr/local/bin/yq && \
     chmod +x /usr/local/bin/yq
+COPY . /workspaces/app
 
 RUN yq --version && just --version
 
