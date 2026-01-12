@@ -1,21 +1,22 @@
 {
   "name": "Ghost-Core Dev Container",
   "build": {
-    "dockerfile": "dockerfile"
+    "dockerfile": "Dockerfile"
   },
   "mounts": [
-        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
-    ],
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
   "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {
-            "version": "latest",
-            "moby": false
-        }
-    },
-  "workspaceFolder": "/workspaces/app",
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": false
+    }
+  },
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "customizations": {
     "vscode": {
       "settings": {
+        "locale": "en",
         "terminal.integrated.defaultProfile.linux": "bash"
       },
       "extensions": [
@@ -27,6 +28,5 @@
       ]
     }
   },
-  "postCreateCommand": "yq --version && just --version",
-  "remoteUser": "root"
+  "postCreateCommand": "echo go to hell"
 }
