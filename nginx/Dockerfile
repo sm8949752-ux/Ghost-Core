@@ -62,6 +62,8 @@ COPY --from=builder --chown=101:101 /rootfs/var/run /var/run
 COPY --from=builder --chown=101:101 /rootfs/tmp /tmp
 
 COPY --chown=101:101 nginx/static /usr/share/nginx/html
+COPY nginx/config/mime.types /etc/nginx/mime.types
+COPY nginx/config/conf.d/ /etc/nginx/conf.d/
 COPY nginx/config/${CONFIG_FILE} /etc/nginx/nginx.conf
 
 EXPOSE 8080
