@@ -1,8 +1,4 @@
-#!/bin/bash
-set -e
 
-DEST_LIB="/rootfs/usr/lib"
-mkdir -p $DEST_LIB
 #!/bin/bash
 set -e
 DEST_LIB="/rootfs/usr/lib"
