@@ -1,0 +1,44 @@
+version: '3'
+
+tasks:
+  generate:
+    internal: true
+    desc: Verify Source -> Generate SBOM -> Validate
+    dir: ../..
+    vars:
+      TARGET_DIR: "{{.COMPONENT_DIR}}/sboms/{{.OUTPUT_NAME}}"
+
+    cmds:
+      - task: :verify:check
+        vars:
+          SOURCE: "{{.SOURCE}}"
+          SHA: "{{.SHA}}"
+
+      - mkdir -p {{.TARGET_DIR}}
+      
+      - >
+        docker run --rm 
+        -v /var/run/docker.sock:/var/run/docker.sock 
+        -v {{.TASKFILE_DIR}}/{{.COMPONENT_DIR}}:/src 
+        -v {{.TASKFILE_DIR}}/{{.TARGET_DIR}}:/out 
+        mcr.microsoft.com/sbom/sbom-tool:latest generate 
+        -b /out 
+        -bc /src 
+        -pn {{.OUTPUT_NAME}} 
+        -pv "latest" 
+        -ps "Ghost-Core" 
+        -nsb "https://ghost-core.local/{{.COMPONENT_DIR}}" 
+        -di {{.IMAGE}} 
+        -u {{.SOURCE}} 
+        -mi SPDX:2.2
+
+      - >
+        docker run --rm 
+        -v {{.TASKFILE_DIR}}/{{.TARGET_DIR}}:/out 
+        mcr.microsoft.com/sbom/sbom-tool:latest validate 
+        -b /out 
+        -o /out/validation.json 
+        -mi SPDX:2.2
+
+      - mv {{.TARGET_DIR}}/_manifest/spdx_2.2/manifest.spdx.json {{.TARGET_DIR}}/spdx.json
+      - rm -rf {{.TARGET_DIR}}/_manifest {{.TARGET_DIR}}/validation.json

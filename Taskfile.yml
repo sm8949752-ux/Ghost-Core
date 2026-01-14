@@ -3,7 +3,15 @@ version: '3'
 includes:
   vars:
     taskfile: ./tasks/vars.yml
+
   nginx:
     taskfile: ./tasks/nginx.yml
+
   redis:
     taskfile: ./tasks/redis.yml
+
+  verify:
+    taskfile: ./tasks/internal/verify.yml
+
+  ms_sbom:
+    taskfile: ./tasks/internal/ms_sbom.yml

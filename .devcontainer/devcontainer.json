@@ -10,14 +10,23 @@
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest",
       "moby": false
-    }
+    },
+    "ghcr.io/devcontainers/features/zsh:1": {}
+  },
+  "containerEnv": {
+    "DOCKER_API_VERSION": "1.43",
+    "TERM": "xterm-256color",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8"
   },
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "customizations": {
     "vscode": {
       "settings": {
         "locale": "en",
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.rendererType": "auto",
+        "terminal.integrated.minimumContrastRatio": 1
       },
       "extensions": [
         "ms-azuretools.vscode-docker",
@@ -29,5 +38,6 @@
       ]
     }
   },
-  "postCreateCommand": "echo 'i ready'"
+  "postCreateCommand": "echo 'Ghost-Core DevContainer ready!' && git config --global color.ui auto",
+  "remoteUser": "vscode"
 }
