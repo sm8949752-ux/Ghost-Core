@@ -1,10 +1,5 @@
 #!/bin/bash
 set -e
-
-DEST_LIB="/rootfs/usr/lib"
-mkdir -p $DEST_LIB
-#!/bin/bash
-set -e
 DEST_LIB="/rootfs/usr/lib"
 DEST_SBIN="/rootfs/sbin"      
 mkdir -p $DEST_LIB $DEST_SBIN
@@ -60,7 +55,7 @@ for FILE in $TARGETS; do
     if command -v scanelf &> /dev/null; then
         NEEDED=$(scanelf --needed --nobanner --format '%n#p' "$FILE" | tr ',' ' ')
         for lib in $NEEDED; do
-            ldd "$FILE" | grep "$lib" | awk '{print $3}' >> $TEMP_LIST || true
+            ldd -r "$FILE" | grep "$lib" | awk '{print $3}' >> $TEMP_LIST || true
         done
     fi
 done
