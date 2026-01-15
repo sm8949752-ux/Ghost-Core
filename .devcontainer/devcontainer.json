@@ -42,6 +42,6 @@
       ]
     }
   },
-  "postCreateCommand": "echo 'Ghost-Core DevContainer ready!' && git config --global color.ui auto",
+  "postCreateCommand": "sudo chown -R vscode:vscode /workspaces/Ghost-Core;sudo chmod 666 /var/run/docker.sock;echo 'Ghost-Core DevContainer ready!' && git config --global color.ui auto",
   "remoteUser": "vscode"
 }

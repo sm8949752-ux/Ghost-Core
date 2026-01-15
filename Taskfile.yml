@@ -1,17 +1,34 @@
 version: '3'
 
+vars:
+  REGISTRY: ghost-core
+
+  GIT_HASH:
+    sh: git rev-parse --short HEAD || echo "dev"
+
+  BUILD_DATE:
+    sh: date -u +'%Y-%m-%dT%H:%M:%SZ'
+
+  # ================= NGINX =================
+  NGINX_VER: 1.29.4
+  NGINX_SHA: "5a7d37eee505866fbab5810fa9f78247d6d5d9157a595c4e7a72043141ddab25"
+
+  # ================= REDIS =================
+  REDIS_VER: 8.4.0
+  REDIS_SHA: "b947d9015622669b5bee8ec954f658b3278d42dbefae23a92d9b7704bfe143f9"
+
 includes:
-  vars:
-    taskfile: ./tasks/vars.yml
+  'build:nginx':
+    taskfile: ./tasks/build/nginx.yml
+    dir: .
+  'build:redis':
+    taskfile: ./tasks/build/nginx.yml
+    dir: .
+  
+  'sbom:nginx':
+    taskfile: ./tasks/sbom/nginx.yml
+    dir: .
+  'sbom:redis':
+    taskfile: ./tasks/sbom/redis.yml
+    dir: .
 
-  nginx:
-    taskfile: ./tasks/nginx.yml
-
-  redis:
-    taskfile: ./tasks/redis.yml
-
-  verify:
-    taskfile: ./tasks/internal/verify.yml
-
-  ms_sbom:
-    taskfile: ./tasks/internal/ms_sbom.yml

@@ -7,7 +7,8 @@ ARG BUILD_MODE="core"
 
 RUN apk add --no-cache \
     build-base pkgconf wget openssl-dev pcre-dev zlib-dev linux-headers \
-    coreutils gd-dev libxml2-dev libxslt-dev geoip-dev libmaxminddb-dev \
+    coreutils gd-dev freetype-dev libjpeg-turbo-dev libpng-dev \
+    libxml2-dev libxslt-dev geoip-dev libmaxminddb-dev \
     binutils scanelf posix-libc-utils bash tzdata ca-certificates perl perl-dev
 
 

@@ -13,18 +13,6 @@ tasks:
         --build-arg REDIS_SHA256={{.REDIS_SHA}}
         -t {{.REGISTRY}}/redis:{{.REDIS_VER}}-dev
         -f redis/Dockerfile .
-
-  run-dev:
-    desc: Run Redis Dev interactively
-    interactive: true
-    cmds:
-      - docker rm -f ghost-redis-dev 2>/dev/null || true
-      - >
-        docker run -it --rm --privileged
-        --name ghost-redis-dev
-        -p 6379:6379
-        {{.REGISTRY}}/redis:{{.REDIS_VER}}-dev
-
   # =========================
   # DOCKER
   # =========================

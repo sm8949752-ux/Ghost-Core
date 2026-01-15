@@ -10,17 +10,6 @@ tasks:
       - light-dev
       - full-dev
       - extras-dev
-  sbom:
-    desc: Generate SBOM for Nginx Core image
-    cmds:
-      - task: :ms_sbom:generate
-        vars:
-          COMPONENT_DIR: "nginx"
-          OUTPUT_NAME: "core"
-          IMAGE: "{{.REGISTRY}}/nginx:{{.NGINX_VER}}-core"
-          SOURCE: "https://nginx.org/download/nginx-{{.NGINX_VER}}.tar.gz"
-          SHA: "{{.NGINX_SHA}}"
-
   light:
     desc: Build Nginx Light (Distroless)
     cmds:
@@ -49,6 +38,8 @@ tasks:
     cmds:
       - >
         docker build --no-cache --target final
+        --build-arg NGINX_VERSION={{.NGINX_VER}}
+        --build-arg NGINX_SHA256={{.NGINX_SHA}}
         --build-arg BUILD_MODE=full
         -t {{.REGISTRY}}/nginx:full
         -f nginx/Dockerfile .
@@ -58,6 +49,8 @@ tasks:
     cmds:
       - >
         docker build --no-cache --target dev
+        --build-arg NGINX_VERSION={{.NGINX_VER}}
+        --build-arg NGINX_SHA256={{.NGINX_SHA}}
         --build-arg BUILD_MODE=full
         -t {{.REGISTRY}}/nginx:full-dev
         -f nginx/Dockerfile .
@@ -67,6 +60,8 @@ tasks:
     cmds:
       - >
         docker build --no-cache --target final
+        --build-arg NGINX_VERSION={{.NGINX_VER}}
+        --build-arg NGINX_SHA256={{.NGINX_SHA}}
         --build-arg BUILD_MODE=extras
         -t {{.REGISTRY}}/nginx:extras
         -f nginx/Dockerfile .
@@ -76,14 +71,8 @@ tasks:
     cmds:
       - >
         docker build --no-cache --target dev
+        --build-arg NGINX_VERSION={{.NGINX_VER}}
+        --build-arg NGINX_SHA256={{.NGINX_SHA}}
         --build-arg BUILD_MODE=extras
         -t {{.REGISTRY}}/nginx:extras-dev
         -f nginx/Dockerfile .
-
-  run-dev:
-    interactive: true
-    cmds:
-      - docker rm -f ghost-nginx-dev 2>/dev/null || true
-      - docker run -it --rm --name ghost-nginx-dev -p 8080:8080 {{.REGISTRY}}/nginx:full-dev bash
-
-

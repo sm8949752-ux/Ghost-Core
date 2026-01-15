@@ -1,4 +1,5 @@
-wget -qO nginx.tar.gz "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"
+echo "Downloading: http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"
+wget -O nginx.tar.gz "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"
 if [ -n "$NGINX_SHA256" ]; then echo "$NGINX_SHA256  nginx.tar.gz" | sha256sum -c -; fi
 tar -xzf nginx.tar.gz
 cd nginx-${NGINX_VERSION}
