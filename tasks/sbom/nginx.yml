@@ -1,0 +1,19 @@
+version: '3'
+
+includes:
+  ms_engine:
+    taskfile: ../internal/sbom/ms-sbom.yml
+
+tasks:
+  'source code:main:ms':
+    desc: Scan Nginx Core Source by microsoft tool
+    cmds:
+      - task: ms_engine:generate
+        vars:
+          NAME: "nginx-ms"
+          VER: "{{.NGINX_VER}}"
+          URL: "http://nginx.org/download/nginx-{{.NGINX_VER}}.tar.gz"
+          SHA: "{{.NGINX_SHA}}"
+          OUT_DIR: "./nginx/sbom"
+
+ 

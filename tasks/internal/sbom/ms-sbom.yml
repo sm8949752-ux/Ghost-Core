@@ -1,0 +1,36 @@
+version: '3'
+
+vars:
+  MS_SBOM_IMAGE: ghost-ms-sbom-tool
+
+  PROJECT_ROOT:
+    sh: git rev-parse --show-toplevel
+
+tasks:
+  build-image:
+    internal: true
+    cmds:
+      - docker build -q -t {{.MS_SBOM_IMAGE}} {{.PROJECT_ROOT}}/tools/ms-sbom-builder > /dev/null
+
+  generate:
+    internal: true
+    deps: [build-image]
+    vars:
+      URL: '{{.URL}}'
+      NAME: '{{.NAME}}'
+      VER: '{{.VER | default "latest"}}'
+      SHA: '{{.SHA}}'
+      OUT_DIR: '{{.OUT_DIR | default "./sboms"}}'
+    cmds:
+      - mkdir -p {{.PROJECT_ROOT}}/{{.OUT_DIR}}
+      - |
+        if [ -z "{{.URL}}" ]; then echo "❌ URL Missing"; exit 1; fi
+
+        echo "🔎 Scanning {{.NAME}}..."
+        docker run --rm \
+          -e TARGET_URL="{{.URL}}" \
+          -e PROJECT_NAME="{{.NAME}}" \
+          -e PROJECT_VERSION="{{.VER}}" \
+          -e EXPECTED_SHA256="{{.SHA}}" \
+          -v {{.PROJECT_ROOT}}/{{.OUT_DIR}}:/output \
+          {{.MS_SBOM_IMAGE}}

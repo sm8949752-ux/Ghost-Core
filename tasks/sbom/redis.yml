@@ -1,0 +1,19 @@
+version: '3'
+
+includes:
+  ms_engine:
+    taskfile: ../internal/sbom/ms-sbom.yml
+
+tasks:
+  'source code:main:ms':
+    desc: Scan redis source code by microsoft tool
+    cmds:
+      - task: ms_engine:generate
+        vars:
+          NAME: "redis"
+          VER: "{{.REDIS_VER}}"
+          URL: "https://github.com/redis/redis/archive/refs/tags/{{.REDIS_VER}}.tar.gz"
+          SHA: "{{.REDIS_SHA}}"
+          OUT_DIR: "./redis/sbom"
+
+ 

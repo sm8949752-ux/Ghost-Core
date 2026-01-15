@@ -1,2 +1,3 @@
 dependency-track/
-sbom/
+nginx/sbom/
+redis/sbom/
