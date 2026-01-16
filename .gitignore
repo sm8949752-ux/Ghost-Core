@@ -2,3 +2,5 @@ dependency-track/
 nginx/sbom/
 redis/sbom/
 bear/packages/
+*.rsa
+*.pub
