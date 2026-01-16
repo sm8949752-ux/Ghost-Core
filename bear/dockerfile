@@ -1,0 +1,7 @@
+FROM cgr.dev/chainguard/melange:latest
+
+WORKDIR /work
+
+COPY bear.yaml /work/bear.yaml
+
+ENTRYPOINT ["/usr/bin/melange"]

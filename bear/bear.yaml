@@ -1,0 +1,60 @@
+package:
+  name: bear
+  version: 4.0.1
+  epoch: 0
+  description: "Bear is a tool that generates a compilation database for clang tooling (Rust version)"
+  copyright:
+    - license: GPL-3.0-or-later
+  dependencies:
+    runtime:
+      - libear
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - build-base
+      - busybox
+      - ca-certificates-bundle
+      - wolfi-base
+      - rust
+      - pkgconf
+      - openssl-dev
+      - protobuf-dev 
+      - zlib-dev
+
+pipeline:
+  - uses: fetch
+    with:
+      uri: https://github.com/rizsotto/Bear/archive/refs/tags/4.0.1.tar.gz
+      extract: true
+      strip-components: 1
+      expected-sha256: 64bcd65a333c6060d929c62b461edbd172a7256e42aae6d327982a0ce643a20c
+
+  - runs: |
+      echo " Checking source files..."
+      ls -F
+      
+      echo " Starting Rust Build..."
+      cargo build --release --locked
+
+      mkdir -p "${{targets.destdir}}/usr/bin"
+      mkdir -p "${{targets.destdir}}/usr/lib/bear"
+
+      mv target/release/bear "${{targets.destdir}}/usr/bin/"
+
+      find target/release -name "libbear.so" -exec mv {} "${{targets.destdir}}/usr/lib/bear/" \; || true
+      find target/release -name "libear.so" -exec mv {} "${{targets.destdir}}/usr/lib/bear/" \; || true
+
+subpackages:
+  - name: libear
+    description: "Runtime library for Bear (interceptor)"
+    pipeline:
+      - runs: |
+          mkdir -p "${{targets.subpkgdir}}/usr/lib/bear"
+          if ls "${{targets.destdir}}/usr/lib/bear"/*.so* 1> /dev/null 2>&1; then
+            mv "${{targets.destdir}}/usr/lib/bear"/*.so* "${{targets.subpkgdir}}/usr/lib/bear/"
+          fi

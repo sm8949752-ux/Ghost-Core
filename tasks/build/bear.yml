@@ -1,0 +1,75 @@
+version: '3'
+
+vars:
+  BUILDER_IMAGE: wolfi-bear-builder
+  KEY_FILE: local-key.rsa
+  BEAR_DIR: bear
+
+tasks:
+  init:
+    desc: "Prepare build environment (QEMU + Docker Image)"
+    dir: '{{.BEAR_DIR}}'
+    cmds:
+      - docker run --privileged --rm tonistiigi/binfmt --install all
+      - docker build -t {{.BUILDER_IMAGE}} .
+
+  keys:
+    desc: "Use signing key from ENV"
+    dir: '{{.BEAR_DIR}}'
+    cmds:
+      - |
+        if [ -z "$BEAR_SIGNING_KEY" ]; then
+          echo "❌ ERROR: BEAR_SIGNING_KEY environment variable is not set!"
+          exit 1
+        fi
+        echo "$BEAR_SIGNING_KEY" > {{.KEY_FILE}}
+
+  build-core:
+    internal: true 
+    dir: '{{.BEAR_DIR}}'
+    requires:
+      vars: [ARCH]
+    deps: [init, keys]
+    cmds:
+      - echo "🏗️  Building Bear for {{.ARCH}}..."
+      - >
+        docker run --rm --privileged
+        -v "$(pwd):/work"
+        {{.BUILDER_IMAGE}} build bear.yaml
+        --signing-key {{.KEY_FILE}}
+        --arch {{.ARCH}}
+        --repository-append https://packages.wolfi.dev/os
+
+  build-amd64:
+    desc: "Build Bear package for AMD64 (x86_64)"
+    cmds:
+      - task: build-core
+        vars: { ARCH: "amd64" }
+
+  build-arm64:
+    desc: "Build Bear package for ARM64 (aarch64)"
+    cmds:
+      - task: build-core
+        vars: { ARCH: "arm64" }
+
+  build-all:
+    desc: "Build for ALL architectures (amd64 + arm64)"
+    cmds:
+      - task: build-amd64
+      - task: build-arm64
+
+  run:
+    desc: "Run and test built package (ARCH=amd64 or ARCH=arm64)"
+    dir: '{{.BEAR_DIR}}'
+    vars:
+      ARCH: '{{default "amd64" .ARCH}}'
+      FOLDER_ARCH: '{{if eq .ARCH "amd64"}}x86_64{{else}}aarch64{{fi}}'
+    cmds:
+      - >
+        docker run --rm --platform linux/{{.ARCH}}
+        -v "$(pwd)/packages/{{.FOLDER_ARCH}}":/packages
+        cgr.dev/chainguard/wolfi-base /bin/sh -c '
+          set -e
+          apk add --allow-untrusted /packages/bear-*.apk /packages/libear-*.apk
+          bear --version
+        '
