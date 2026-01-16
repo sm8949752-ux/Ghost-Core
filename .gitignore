@@ -4,3 +4,4 @@ redis/sbom/
 bear/packages/
 *.rsa
 *.pub
+jdk/21/packages/

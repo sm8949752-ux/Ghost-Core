@@ -1,0 +1,123 @@
+package:
+  name: oracle-jdk-21
+  version: 21.0.9
+  epoch: 0
+  description: "Official Oracle Java Development Kit (JDK 21)"
+  copyright:
+    - license: "GPL-2.0-or-later WITH Classpath-exception-2.0"
+  dependencies:
+    runtime:
+      - oracle-jdk-21-jdk
+
+vars:
+  jdk_version: "21"
+  sha_x86_64: "0854421306468559813f1e5068e036213f9710e1e239d823c0d63552a1259e25"
+  sha_aarch64: "6e0eef0f229e121dd432358b60e2755bc0916b207bcef014839c78cf9e4367ac"
+  install_path: "/usr/lib/jvm/java-21-oracle"
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - build-base
+      - busybox
+      - ca-certificates-bundle
+      - wget
+
+pipeline:
+  - runs: |
+      set -e
+      case "${{build.arch}}" in
+        x86_64)
+          URI="https://download.oracle.com/java/${{vars.jdk_version}}/latest/jdk-${{vars.jdk_version}}_linux-x64_bin.tar.gz"
+          EXPECTED_SHA="${{vars.sha_x86_64}}"
+          ;;
+        aarch64)
+          URI="https://download.oracle.com/java/${{vars.jdk_version}}/latest/jdk-${{vars.jdk_version}}_linux-aarch64_bin.tar.gz"
+          EXPECTED_SHA="${{vars.sha_aarch64}}"
+          ;;
+        *)
+          echo "Unsupported architecture: ${{build.arch}}"
+          exit 1
+          ;;
+      esac
+
+      echo "Downloading JDK for ${{build.arch}}..."
+      wget -O jdk.tar.gz "${URI}"
+      
+      echo "Verifying SHA256..."
+      echo "${EXPECTED_SHA}  jdk.tar.gz" | sha256sum -c
+
+      mkdir -p "${{targets.destdir}}${{vars.install_path}}"
+      tar -xzf jdk.tar.gz -C "${{targets.destdir}}${{vars.install_path}}" --strip-components=1
+      rm jdk.tar.gz
+
+subpackages:
+  - name: oracle-jdk-21-jre-headless
+    description: "Official Oracle Java Runtime (JRE), headless"
+    pipeline:
+      - runs: |
+          SRC="${{targets.destdir}}${{vars.install_path}}"
+          DEST="${{targets.subpkgdir}}${{vars.install_path}}"
+          
+          mkdir -p "$DEST/bin"
+          mv "$SRC/conf" "$DEST/"
+          mv "$SRC/legal" "$DEST/"
+          mv "$SRC/lib" "$DEST/"
+          mv "$SRC/release" "$DEST/"
+          mv "$SRC/bin/java" "$DEST/bin/"
+          mv "$SRC/bin/keytool" "$DEST/bin/"
+          mv "$SRC/bin/rmiregistry" "$DEST/bin/"
+          mkdir -p "${{targets.subpkgdir}}/usr/bin"
+          ln -sf "${{vars.install_path}}/bin/java" "${{targets.subpkgdir}}/usr/bin/java"
+          ln -sf "${{vars.install_path}}/bin/keytool" "${{targets.subpkgdir}}/usr/bin/keytool"
+          ln -sf "${{vars.install_path}}/bin/rmiregistry" "${{targets.subpkgdir}}/usr/bin/rmiregistry"
+
+  - name: oracle-jdk-21-jre
+    description: "Official Oracle Java Runtime (JRE), with GUI support"
+    dependencies:
+      runtime:
+        - oracle-jdk-21-jre-headless
+    pipeline:
+      - runs: |
+          SRC="${{targets.destdir}}${{vars.install_path}}"
+          DEST="${{targets.subpkgdir}}${{vars.install_path}}"
+          mkdir -p "$DEST/bin"
+          if [ -f "$SRC/bin/policytool" ]; then
+            mv "$SRC/bin/policytool" "$DEST/bin/"
+            mkdir -p "${{targets.subpkgdir}}/usr/bin"
+            ln -sf "${{vars.install_path}}/bin/policytool" "${{targets.subpkgdir}}/usr/bin/policytool"
+          fi
+
+  - name: oracle-jdk-21-jdk-headless
+    description: "Official Oracle Java Development Kit (JDK), headless"
+    dependencies:
+      runtime:
+        - oracle-jdk-21-jre-headless
+    pipeline:
+      - runs: |
+          SRC="${{targets.destdir}}${{vars.install_path}}"
+          DEST="${{targets.subpkgdir}}${{vars.install_path}}"
+          mkdir -p "$DEST"
+          mv "$SRC/include" "$DEST/"
+          mv "$SRC/jmods" "$DEST/"
+          mv "$SRC/bin" "$DEST/"
+          mv "$SRC/man" "$DEST/"
+          mkdir -p "${{targets.subpkgdir}}/usr/bin"
+          for tool_path in "$DEST/bin"/*; do
+            tool=$(basename "$tool_path")
+            ln -sf "${{vars.install_path}}/bin/$tool" "${{targets.subpkgdir}}/usr/bin/$tool"
+          done
+
+  - name: oracle-jdk-21-jdk
+    description: "Official Oracle Java Development Kit (JDK), with GUI tools"
+    dependencies:
+      runtime:
+        - oracle-jdk-21-jre
+        - oracle-jdk-21-jdk-headless
+    pipeline:
+      - runs: |
+          echo "Metapackage for the full Oracle Java Development Kit."

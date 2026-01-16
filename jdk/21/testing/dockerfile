@@ -1,0 +1,24 @@
+FROM cgr.dev/chainguard/wolfi-base AS jre-test
+ARG ARCH
+COPY packages/${ARCH}/*.apk /tmp/packages/
+RUN apk add --no-cache --allow-untrusted /tmp/packages/oracle-jdk-21-jre-headless-*.apk
+
+WORKDIR /app
+COPY testing/Test.java .
+RUN if command -v javac; then echo "FAIL: javac should not be in JRE" && exit 1; else echo "PASS: javac is absent in JRE"; fi
+
+FROM cgr.dev/chainguard/wolfi-base AS full-test
+ARG ARCH
+COPY packages/${ARCH}/*.apk /tmp/packages/
+RUN apk add --no-cache --allow-untrusted /tmp/packages/*.apk
+
+WORKDIR /app
+COPY testing/Test.java .
+RUN javac Test.java
+RUN java Test
+
+RUN keytool -help > /dev/null && echo "PASS: keytool is working"
+RUN jar --version && echo "PASS: jar tool is working"
+RUN jlink --version && echo "PASS: jlink tool is working"
+
+CMD ["java", "Test"]

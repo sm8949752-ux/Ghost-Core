@@ -1,0 +1,7 @@
+FROM cgr.dev/chainguard/melange:latest
+
+WORKDIR /work
+
+COPY oracle-jdk-21.yaml /work/oracle-jdk-21.yaml
+
+ENTRYPOINT ["melange"]
