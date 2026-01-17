@@ -23,7 +23,7 @@ tasks:
           exit 1
         fi
         echo "$BEAR_SIGNING_KEY" > {{.KEY_FILE}}
-
+        echo "$BEAR_SIGNING_KEY_PUBLIC" > {{.KEY_FILE}}.pub
   build-core:
     internal: true 
     dir: '{{.BEAR_DIR}}'

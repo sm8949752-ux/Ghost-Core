@@ -9,7 +9,15 @@ RUN apk add --no-cache \
     build-base pkgconf wget openssl-dev pcre-dev zlib-dev linux-headers \
     coreutils gd-dev freetype-dev libjpeg-turbo-dev libpng-dev \
     libxml2-dev libxslt-dev geoip-dev libmaxminddb-dev \
-    binutils scanelf posix-libc-utils bash tzdata ca-certificates perl perl-dev
+    binutils scanelf posix-libc-utils bash tzdata ca-certificates perl perl-dev \
+    nodejs npm
+
+
+COPY bear/packages/x86_64/*.apk /tmp/bear-pkgs/
+RUN apk add --allow-untrusted /tmp/bear-pkgs/*.apk
+
+RUN npm install -g @cyclonedx/cdxgen
+
 
 
 RUN ln -sf /usr/lib/libz.so.1 /usr/lib/libz.so
@@ -47,6 +55,7 @@ LABEL org.opencontainers.image.version="${NGINX_VERSION}"
 LABEL org.opencontainers.image.revision="${VCS_REF}"
 LABEL org.opencontainers.image.created="${BUILD_DATE}"
 LABEL org.opencontainers.image.vendor="Taha2Samy"
+COPY --from=builder /sbom/nginx.cdx.json /usr/share/doc/nginx/nginx.cdx.json
 
 COPY --from=builder /rootfs/etc/passwd /etc/passwd
 COPY --from=builder /rootfs/etc/group /etc/group

@@ -6,7 +6,11 @@ cd nginx-${NGINX_VERSION}
 
 ./configure "$@" || { echo "Configure Failed"; cat objs/autoconf.err; exit 1; }
 
-make -j"$(nproc)"
+bear -- make -j"$(nproc)"
+
+mkdir -p /rootfs/usr/share/doc/nginx/
+cdxgen -t c --compile-commands compile_commands.json -o /rootfs/usr/share/doc/nginx/nginx.cdx.json .
+
 make install DESTDIR=/rootfs
 
 strip /rootfs/usr/sbin/nginx
