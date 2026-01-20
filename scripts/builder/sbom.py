@@ -2,17 +2,17 @@ import json
 import os
 import platform
 
-def generate_sbom(nginx_version, components, output_path):
+def generate_sbom(version,name,url, components, output_path):
     """
     Constructs a valid CycloneDX JSON SBOM.
     
     Args:
-        nginx_version (str): The version of the main application (Nginx).
+        version (str): The version of the main application.
         components (list): List of dicts [{'name': '...', 'version': '...', 'file': '...'}]
         output_path (str): Where to save the JSON file.
     """
     
-    # 1. Main Component (Nginx)
+    # 1. Main Component 
     # Defined manually because we built it from source
     sbom = {
         "bomFormat": "CycloneDX",
@@ -21,18 +21,18 @@ def generate_sbom(nginx_version, components, output_path):
         "metadata": {
             "component": {
                 "type": "container",
-                "name": "ghost-core/nginx",
-                "version": nginx_version
+                "name": f"ghost-core/{name}",
+                "version": version
             }
         },
         "components": [
             {
                 "type": "application",
-                "name": "nginx",
-                "version": nginx_version,
+                "name": f"{name}",
+                "version": version,
                 # PURL links to the generic download URL (Source of Truth)
-                "purl": f"pkg:generic/nginx@{nginx_version}?download_url=http://nginx.org/download/nginx-{nginx_version}.tar.gz",
-                "cpe": f"cpe:2.3:a:nginx:nginx:{nginx_version}:*:*:*:*:*:*:*",
+                "purl": f"pkg:generic/{name}@{version}?download_url={url}",
+                "cpe": f"cpe:2.3:a:{name}:{name}:{version}:*:*:*:*:*:*:*",
                 "properties": [
                     {"name": "syft:package:type", "value": "manual"},
                     {"name": "ghost:build:mode", "value": "source-compiled"}
