@@ -30,11 +30,14 @@ RUN echo "============================== $(python3 --version)"
 RUN echo "============================== $(tree /opt/builder/)"
 ENV PYTHONPATH="/opt"
 
-
 RUN python3 -m builder.core \
     --rootfs /rootfs \
     --nginx-version "${NGINX_VERSION}" \
+    --name nginx \
+    --source-url "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" \
     --output-sbom /rootfs/usr/share/doc/nginx/nginx.cdx.json
+
+
  
 #RUN extract_libs.sh /rootfs/usr/sbin/nginx /rootfs/usr/lib/nginx/modules/*.so
 
